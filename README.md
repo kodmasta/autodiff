@@ -1,1 +1,1 @@
-autodiff.github.io
+https://kodmasta.github.io/autodiff/

@@ -12,7 +12,7 @@ header, footer {
     color: #fff;
     padding: 20px;
     text-align: center;
-    width: 80%; /* Constrain width to 80% of the screen */
+    width: 100%; /* Constrain width to 80% of the screen */
     margin: auto; /* Center the header on the page */
     box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Optional: adds shadow for depth */
     border-radius: 10px; /* Optional: rounds the corners */

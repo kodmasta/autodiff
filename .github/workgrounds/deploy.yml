@@ -1,0 +1,17 @@
+- name: Cleanup Old Artifacts
+  uses: actions/github-script@v4
+  with:
+    script: |
+      const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        run_id: context.runId
+      });
+      const artifactToDelete = artifacts.data.artifacts.find(artifact => artifact.name === "github-pages");
+      if (artifactToDelete) {
+        await github.rest.actions.deleteArtifact({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          artifact_id: artifactToDelete.id
+        });
+      }

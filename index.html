@@ -63,13 +63,14 @@ sumFunc :: Int -> Func
 sumFunc m = Func {
   func = \xs -> replicate m (sum xs),
   grad = \xs -> replicate m (replicate (length xs) 1)
+  --grad is the Jacobian of f
 }
 
 -- Backpropagation algorithm
 backprop :: Vec -> Func -> Vec -> [Vec]
 backprop yBars f dy_df =
   let
-    -- Compute the gradients of f with respect to its inputs
+    -- Compute the gradients/Jacobian of f with respect to its inputs
     gradients = grad f yEntire
     -- Initialize yEntire for the first call as yBars
     yEntire = map (sum . zipWith (*) yBars) gradients
@@ -77,7 +78,6 @@ backprop yBars f dy_df =
     if length yEntire == 1 then [yEntire]
     else yEntire : backprop yEntire (Func (func f) (grad f)) dy_df
 
--- Example usage:
 -- Assuming n = 3 (x1, x2, x3) and m = 4
 -- y_i^bar = [1.0, 2.0, 3.0, 4.0]
 main :: IO ()

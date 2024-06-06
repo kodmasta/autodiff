@@ -7,6 +7,8 @@
 </head>
 <body>
 <header>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <h1>Autodiff project</h1>
     <p style="text-align: center;">Weekly updates on my progress implementing the reverse mode of the AD algorithm in Haskell. Project under the supervision of Professor Stefan Monnier.</p>
     <p style="text-align: center;">Project Description: Implement the reverse mode of the AD algorithm based on Haskell's typeclasses, which would work for any program written in Haskell. A literature review on AD and RAD (Randomized Automatic Differentiation).</p>
@@ -45,38 +47,79 @@
     </div>
     <div class="progress-box">
         <div class="progress-heading">Progress on coding the AD</div>
-        <div class="progress-note">AD on a single elementary operation (sumFunc) with n inputs and m ouputs</div>
+        <div class="progress-note">AD on a single elementary operation (sumFunc) with \( n\) inputs and \( m\) outputs</div>
         <pre><code>
-        sumFunc :: Int -> Func
-        sumFunc m = Func {
-          func = \xs -> replicate m (sum xs),
-          grad = \xs -> replicate m (replicate (length xs) 1)
-        }
+type R = Double  -- Real numbers
+type Vec = [R]   -- Vector of real numbers
 
-        backprop :: Vec -> Func -> Vec -> Vec
-        backprop yBars f dy_df =
-          let
-            gradients = grad f yBars
-            fBar = zipWith (*) yBars dy_df
-          in sum fBar
+-- A function type that includes the function and its gradient
+data Func = Func {
+  func :: Vec -> Vec,          -- The function
+  grad :: Vec -> [Vec]         -- Gradient of the function
+}
 
-        main :: IO ()
-        main = do
-          let yBars = [1.0, 2.0, 3.0, 4.0]
-          let f = sumFunc 4
-          let dy_df = replicate 4 1
-          let result = backprop yBars f dy_df
-          print result
+-- Function f: sums up the inputs and replicates the sum m times
+sumFunc :: Int -> Func
+sumFunc m = Func {
+  func = \xs -> replicate m (sum xs),
+  grad = \xs -> replicate m (replicate (length xs) 1)
+}
+
+-- Backpropagation algorithm
+backprop :: Vec -> Func -> Vec -> [Vec]
+backprop yBars f dy_df =
+  let
+    -- Compute the gradients of f with respect to its inputs
+    gradients = grad f yEntire
+    -- Initialize yEntire for the first call as yBars
+    yEntire = map (sum . zipWith (*) yBars) gradients
+  in
+    if length yEntire == 1 then [yEntire]
+    else yEntire : backprop yEntire (Func (func f) (grad f)) dy_df
+
+-- Example usage:
+-- Assuming n = 3 (x1, x2, x3) and m = 4
+-- y_i^bar = [1.0, 2.0, 3.0, 4.0]
+main :: IO ()
+main = do
+  let yBars = [1.0, 2.0, 3.0, 4.0]
+  let f = sumTableFunc 4
+  let dy_df = replicate 4 1  -- Since each y_i is an identity function of the sum
+  let results = backprop yBars f dy_df
+  print results
         </code></pre>
-        <div class="progress-note">Question: many ways to write an elementary function</div>
-        <pre><code>
-        sumElements :: Vec -> Vec
-        sumElements xs = let totalSum = sum xs in replicate (length xs) totalSum
-    </code></pre>
     </div>
+        <div class="progress-box">
+            <div class="progress-heading">Questions</div>
+            <div class="progress-note"> \(\text{Should all elementary functions be } \mathbb{R}^n \to \mathbb{R}^m \text{?}
+                \) </div>
+            <div class="progress-note">How do I break down functions into elementary functions? For example:</div>
+            <pre><code>
+sumElements :: Vec -> Vec
+sumElements xs = let totalSum = sum xs in replicate (length xs) totalSum
+            </code></pre>
+            <div class="progress-note">How do I accumulate the
+                \(\begin{bmatrix}
+                \bar{f}_1 \\
+                \bar{f}_2 \\
+                \vdots \\
+                \bar{f}_{k_{x_i}}
+                \end{bmatrix} \)
+                and
+                \( \begin{bmatrix}
+                \frac{df_1}{dx_i} \\
+                \frac{df_2}{dx_i} \\
+                \vdots \\
+                \frac{df_{k_{x_i}}}{dx_i}
+                \end{bmatrix}
+                \)
+                inputs for the x layer?</div>
 
+
+        </div>
 
 </section>
+
 <section id="week5-7">
     <h2>Week 5 - 7 (June 11 - July 1)</h2>
     <p>Code the AD algorithm.</p>

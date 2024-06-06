@@ -4,32 +4,6 @@
     <meta charset="UTF-8">
     <title>Autodiff Project Journal</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-        .progress-box {
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin-top: 20px;
-            overflow-x: auto;
-        }
-        .progress-box iframe {
-            width: 100%;
-            height: 500px; /* Adjust the height as needed */
-            border: none;
-        }
-        .progress-heading {
-            font-size: 1.2em;
-            margin-bottom: 10px;
-            font-weight: bold;
-            text-align: center;
-        }
-        .progress-note {
-            font-size: 0.9em;
-            margin-bottom: 10px;
-            text-align: center;
-            color: #666;
-        }
-    </style>
 </head>
 <body>
 <header>
@@ -57,7 +31,7 @@
     <p>Plan: Discuss papers with Professor Stefan Monnier and refamiliarize with functional programming. Watch Youtube tutorials.</p>
     <div class="progress-box">
         <div class="progress-heading">Progress on Literature Review</div>
-        <div class="progress-note">Here is the current progress on my literature review:</div>
+        <div class="progress-note">In depth review on how AD works mathematically and technically:</div>
         <iframe src="Literature_review_week2.pdf"></iframe>
     </div>
 </section>
@@ -66,9 +40,42 @@
     <p>Explore the different data structures used to accumulate the derivative. How is the concept of dual numbers applied in code, what is operator overloading, how to code the computation graph of a given haskell program/function.</p>
     <div class="progress-box">
         <div class="progress-heading">Progress on Literature Review</div>
-        <div class="progress-note">Here is the current progress on my literature review:</div>
+        <div class="progress-note">In depth review on how AD works mathematically and technically part 2:</div>
         <iframe src="Literature_review_week3.pdf"></iframe>
     </div>
+    <div class="progress-box">
+        <div class="progress-heading">Progress on coding the AD</div>
+        <div class="progress-note">AD on a single elementary operation (sumFunc) with n inputs and m ouputs</div>
+        <pre><code>
+        sumFunc :: Int -> Func
+        sumFunc m = Func {
+          func = \xs -> replicate m (sum xs),
+          grad = \xs -> replicate m (replicate (length xs) 1)
+        }
+
+        backprop :: Vec -> Func -> Vec -> Vec
+        backprop yBars f dy_df =
+          let
+            gradients = grad f yBars
+            fBar = zipWith (*) yBars dy_df
+          in sum fBar
+
+        main :: IO ()
+        main = do
+          let yBars = [1.0, 2.0, 3.0, 4.0]
+          let f = sumFunc 4
+          let dy_df = replicate 4 1
+          let result = backprop yBars f dy_df
+          print result
+        </code></pre>
+        <div class="progress-note">Question: many ways to write an elementary function</div>
+        <pre><code>
+        sumElements :: Vec -> Vec
+        sumElements xs = let totalSum = sum xs in replicate (length xs) totalSum
+    </code></pre>
+    </div>
+
+
 </section>
 <section id="week5-7">
     <h2>Week 5 - 7 (June 11 - July 1)</h2>
